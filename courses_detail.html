@@ -1,0 +1,75 @@
+<!-- templates/courses/course_detail.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-8">
+            {% if course.thumbnail %}
+                <img src="{{ course.thumbnail.url }}" class="img-fluid rounded mb-3" alt="{{ course.title }}">
+            {% endif %}
+            
+            <h2>{{ course.title }}</h2>
+            <p class="lead">{{ course.description }}</p>
+            
+            <!-- Modules & Lessons -->
+            <h4 class="mt-4">Course Content</h4>
+            <div class="accordion" id="courseContent">
+                {% for module in modules %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#module{{ module.id }}">
+                                📁 {{ module.title }}
+                            </button>
+                        </h2>
+                        <div id="module{{ module.id }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}">
+                            <div class="accordion-body">
+                                <ul class="list-group list-group-flush">
+                                    {% for lesson in module.lessons.all %}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <span>
+                                                {% if is_enrolled %}
+                                                    <a href="{% url 'courses:lesson_detail' course.pk lesson.pk %}">
+                                                        🎬 {{ lesson.title }}
+                                                    </a>
+                                                {% else %}
+                                                    🔒 {{ lesson.title }}
+                                                {% endif %}
+                                            </span>
+                                            <span class="badge bg-secondary rounded-pill">
+                                                {% if lesson.video_file or lesson.video_url %}Video{% endif %}
+                                                {% if lesson.pdf_file %} + PDF{% endif %}
+                                            </span>
+                                        </li>
+                                    {% empty %}
+                                        <li class="list-group-item">No lessons yet.</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h3 class="text-primary">₹{{ course.price }}</h3>
+                    
+                    {% if is_enrolled %}
+                        <div class="alert alert-success">✅ You are enrolled!</div>
+                    {% elif user.is_authenticated %}
+                        <a href="{% url 'payments:checkout' course.pk %}" class="btn btn-primary btn-lg w-100">
+                            Enroll Now
+                        </a>
+                    {% else %}
+                        <p class="text-muted">Please login to enroll.</p>
+                        <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary w-100">Login</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

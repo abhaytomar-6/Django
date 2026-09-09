@@ -1,0 +1,41 @@
+<!-- templates/payments/checkout.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-body text-center">
+                    <h3>Complete Your Purchase</h3>
+                    <h4>{{ course.title }}</h4>
+                    <h2 class="text-primary">₹{{ course.price }}</h2>
+                    <hr>
+                    <button id="checkoutBtn" class="btn btn-success btn-lg w-100">
+                        Pay Now with Stripe
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    const stripe = Stripe('{{ stripe_publishable_key }}');
+    document.getElementById('checkoutBtn').addEventListener('click', function() {
+        fetch('', { method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token }}' } })
+            .then(res => res.json())
+            .then(data => {
+                if (data.session_id) {
+                    stripe.redirectToCheckout({ sessionId: data.session_id });
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            });
+    });
+</script>
+{% endblock %}

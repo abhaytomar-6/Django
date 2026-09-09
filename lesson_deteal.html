@@ -1,0 +1,56 @@
+<!-- templates/courses/lesson_detail.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3">
+            <h5>Course Content</h5>
+            <div class="list-group">
+                {% for module in modules %}
+                    <div class="list-group-item fw-bold">{{ module.title }}</div>
+                    {% for l in module.lessons.all %}
+                        <a href="{% url 'courses:lesson_detail' course.pk l.pk %}" 
+                           class="list-group-item list-group-item-action {% if l.pk == lesson.pk %}active{% endif %}">
+                            {{ l.title }}
+                        </a>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <h3>{{ lesson.title }}</h3>
+            
+            <!-- Video Player -->
+            {% if lesson.video_file %}
+                <div class="ratio ratio-16x9 mb-4">
+                    <video controls>
+                        <source src="{{ lesson.video_file.url }}" type="video/mp4">
+                    </video>
+                </div>
+            {% elif lesson.video_url %}
+                <div class="ratio ratio-16x9 mb-4">
+                    <iframe src="{{ lesson.video_url }}" allowfullscreen></iframe>
+                </div>
+            {% endif %}
+            
+            <!-- Content -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    {{ lesson.content|safe }}
+                </div>
+            </div>
+            
+            <!-- PDF Download -->
+            {% if lesson.pdf_file %}
+                <a href="{{ lesson.pdf_file.url }}" class="btn btn-danger" download>
+                    <i class="bi bi-filetype-pdf"></i> Download PDF
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
